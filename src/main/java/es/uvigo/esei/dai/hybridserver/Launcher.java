@@ -17,8 +17,25 @@
  */
 package es.uvigo.esei.dai.hybridserver;
 
+import java.io.IOException;
+import java.util.Map;
+
 public class Launcher {
   public static void main(String[] args) {
-    // TODO Ejecutar el servidor
+        Map<String, String> seed = Map.of(
+      "ls", "<html><body><h1>Página 1234</h1></body></html>",
+      "abcd", "<html><body><h1>Página abcd</h1></body></html>"
+    );
+      try (HybridServer server = new HybridServer(seed)) {
+      server.start();
+      System.out.println("Servidor escuchando en http://localhost:" + server.getPort());
+      System.out.println("Pulsa ENTER para parar...");
+      System.in.read(); // bloquea hasta ENTER
+    }
+    catch(IOException e){
+      e.printStackTrace();
+      
+    }
+    
   }
 }

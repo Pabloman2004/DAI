@@ -20,73 +20,110 @@ package es.uvigo.esei.dai.hybridserver.http;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 public class HTTPResponse {
+
+  private String version;
+  private HTTPResponseStatus status;
+  private Map<String,String> cabecera;
+  private String contenido;
+
   public HTTPResponse() {
-    // TODO Completar
+    this.version = "HTTP/1.1";
+    this.status = HTTPResponseStatus.S200;
+    this.cabecera = new HashMap<>();
+    this.contenido = "";
   }
 
   public HTTPResponseStatus getStatus() {
-    // TODO Completar
-    return null;
+    return this.status;
   }
 
   public void setStatus(HTTPResponseStatus status) {
-    // TODO Completar
+    this.status = status;
   }
 
   public String getVersion() {
-    // TODO Completar
-    return null;
+    return this.version;
   }
 
   public void setVersion(String version) {
-    // TODO Completar
+     this.version = version;
   }
 
   public String getContent() {
-    // TODO Completar
-    return null;
+    return this.contenido;
   }
 
-  public void setContent(String content) {
-    // TODO Completar
-  }
+// lo hago así para no tener que hacer "Content-Length" en el metodo printer
+public void setContent(String content) {
+    this.contenido = content != null ? content : "";
+    this.cabecera.put("Content-Length", String.valueOf(this.contenido.length()));
+}
+
 
   public Map<String, String> getParameters() {
-    // TODO Completar
-    return null;
+    return this.cabecera;
   }
 
   public String putParameter(String name, String value) {
-    // TODO Completar
-    return null;
+    return this.cabecera.put(name, value); //si ya existia un valor con esa cabecera lo devuelve si era null lo añade y ya
   }
 
   public boolean containsParameter(String name) {
-    // TODO Completar
-    return false;
+    return this.cabecera.containsKey(name);
   }
 
   public String removeParameter(String name) {
-    // TODO Completar
-    return null;
+    return this.cabecera.remove(name);
   }
 
   public void clearParameters() {
-    // TODO Completar
+    this.cabecera.clear();
   }
 
-  public List<String> listParameters() {
-    // TODO Completar
-    return null;
-  }
+public List<String> listParameters() {
+    return new ArrayList<>(this.cabecera.keySet());
+}
 
-  public void print(Writer writer) throws IOException {
-    // TODO Completar
-  }
+
+public void print(Writer writer) throws IOException {
+    StringBuilder sb = new StringBuilder();
+
+    // 1. Línea de estado
+    sb.append(this.version)
+      .append(" ")
+      .append(this.status.getCode())
+      .append(" ")
+      .append(this.status.getStatus())
+      .append("\r\n");
+
+    // 2. Cabeceras
+    for (Map.Entry<String, String> entry : this.cabecera.entrySet()) {
+        sb.append(entry.getKey())
+          .append(": ")
+          .append(entry.getValue())
+          .append("\r\n");
+    }
+
+    // 3. Línea en blanco para separar cabeceras y contenido
+    sb.append("\r\n");
+
+    // 4. Cuerpo (si lo hay)
+    if (this.contenido != null && !this.contenido.isEmpty()) {
+        sb.append(this.contenido);
+    }
+
+    // 5. Escribir en el Writer
+    writer.write(sb.toString());
+    writer.flush();
+}
+
 
   @Override
   public String toString() {

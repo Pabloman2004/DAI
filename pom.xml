@@ -25,11 +25,11 @@
 		</contributor>
 	</contributors>
 
-	<!-- developers>
+	<developers>
 		<developer>
-			<id>[Login el email de la ESEI (p.ej. student@esei.uvigo.es => student)]</id>
-			<email>[xxx@esei.uvigo.es]</email>
-			<name>[Nombre completo]</name>
+			<id>[pfgullon22]</id>
+			<email>[pfgullon22@esei.uvigo.es]</email>
+			<name>[Pablo Freire Gullon]</name>
 			<organization>Escola Superior de Enxeñaría Informática - Universidade de
 	Vigo</organization>
 			<roles>
@@ -37,19 +37,19 @@
 			</roles>
 		</developer>
 		<developer>
-			<id>[Login el email de la ESEI (p.ej. student@esei.uvigo.es => student)]</id>
-			<email>[xxx@esei.uvigo.es]</email>
-			<name>[Nombre completo]</name>
+			<id>[pfgullon22]</id>
+			<email>[pfgullon22@esei.uvigo.es]</email>
+			<name>[Pablo Freire Gullón]</name>
 			<organization>Escola Superior de Enxeñaría Informática - Universidade de
 	Vigo</organization>
 			<roles>
 				<role>student</role>
 			</roles>
 		</developer>
-	</developers -->
+	</developers>
 
 	<properties>
-		<group.name>[nombre_del_grupo]</group.name>
+		<group.name>[PabloFreireGullon]</group.name>
 
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
