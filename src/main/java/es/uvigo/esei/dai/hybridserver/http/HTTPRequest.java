@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 /* En esta clase tengo que recoger los campos de una consulta http (Funciona completamente para GET)*/
 import java.util.Map;
 
@@ -19,7 +21,7 @@ public class HTTPRequest {
 
   private HTTPRequestMethod method;
   private String httpVersion;
-  private String resourceChain; // es todo el link ejemplo
+  private String resourceChain; // es todo el link ejemplo //
                                 // /hello/world.html?country=Spain&province=Ourense&city=Ourense
   public Map<String, String> headerParameters;
   private String content;
@@ -107,25 +109,21 @@ public class HTTPRequest {
 
     // Debe haberse leído ya la línea en blanco tras las cabeceras
     if (this.contentLength > 0) {
-      int remaining = this.contentLength;
-      char[] buf = new char[Math.min(8192, remaining)];
-      StringBuilder body = new StringBuilder(this.contentLength);
-
-      while (remaining > 0) {
-        int toRead = Math.min(buf.length, remaining);
-        int n = reader.read(buf, 0, toRead);
+      char[] buf = new char[this.contentLength];
+      int off = 0;
+      while (off < this.contentLength) {
+        int n = read.read(buf, off, contentLength - off);
         if (n == -1) {
-          // Permisivo: no lances excepción; sal y quédate con lo leído
-          break;
+          throw new HTTPParseException("Unexpected EOF while reading body");
         }
-        body.append(buf, 0, n);
-        remaining -= n;
+        off += n;
       }
-
-      this.content = body.toString();
-    } else {
+      this.content = new String(buf, 0, contentLength);
+      this.content = URLDecoder.decode(content, StandardCharsets.UTF_8.name());
+    }else{
       this.content = null;
     }
+
 
   }
 
@@ -203,7 +201,7 @@ public class HTTPRequest {
   }
 
   public Map<String, String> getResourceParameters() {
-    //en el caso de ser post los parametros estan en el cuerpo
+    // en el caso de ser post los parametros estan en el cuerpo
     if (this.content != null && !this.content.isEmpty()) {
       // por si arrastra CR/LF finales del body
       String body = this.content.trim();
