@@ -131,7 +131,29 @@ class ClientHandler implements Runnable {
     public void handlePost(HTTPRequest req, Writer out) {
     }
 
-    public void handleDelete(HTTPRequest req, Writer out) {
+    public void handleDelete(HTTPRequest req, Writer out) throws IOException {
+
+        Map<String, String> params = req.getResourceParameters();
+        String uuid = (params != null) ? params.get("uuid") : null;
+
+        if (uuid == null || uuid.isEmpty()) {
+            writeError(out, HTTPResponseStatus.S400, "Falta el parámetro uuid");
+            return;
+        }
+
+        String removed = repository.remove(uuid);
+        if (removed == null) {
+            writeError(out, HTTPResponseStatus.S404, "Página no encontrada");
+            return;
+        }
+
+        HTTPResponse res = new HTTPResponse();
+        res.setStatus(HTTPResponseStatus.S200);
+        res.putParameter("Content-Type", "text/html; charset=UTF-8");
+        res.putParameter("Connection", "close");
+        res.setContent("<html><body><h1>DELETE recibido correctamente</h1></body></html>");
+        res.print(out);
+        out.flush();
     }
 
     private static void writeError(Writer out, HTTPResponseStatus status, String message) throws IOException {

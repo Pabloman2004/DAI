@@ -30,6 +30,11 @@ public final class PageRepository {
         return this.pages.containsKey(uuid);
     }
 
+    public String remove(String uuid) {
+        return this.pages.remove(uuid);
+    }
+
+
     public Map<String, String> all() {
         // snapshot inmutable y ordenado por UUID para que sea estable
         return this.pages.entrySet().stream()

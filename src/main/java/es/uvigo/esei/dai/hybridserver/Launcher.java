@@ -23,7 +23,7 @@ import java.util.Map;
 public class Launcher {
   public static void main(String[] args) {
         Map<String, String> seed = Map.of(
-      "ls", "<html><body><h1>Página 1234</h1></body></html>",
+      "1234", "<html><body><h1>Página 1234</h1></body></html>",
       "abcd", "<html><body><h1>Página abcd</h1></body></html>"
     );
       try (HybridServer server = new HybridServer(seed)) {
