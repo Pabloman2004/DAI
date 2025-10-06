@@ -11,7 +11,6 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-
 //le paso el socket que se creo entre el cliente y el servidor, y el listado de paginas almecenadas
 class ClientHandler implements Runnable {
     private final Socket socket;
@@ -24,95 +23,23 @@ class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-
-        //con un try con recursos creo un input y output para leer lo que memanda el cliente y escribir la respuesta
         try (
                 Reader in = new InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8);
                 Writer out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
-            // 1) Parsear la petición HTTP
+            // parseamos la peticion
             HTTPRequest req = new HTTPRequest(in);
 
-            // 2) Solo GET permitido
-            if (req.getMethod() != HTTPRequestMethod.GET) {
-                writeError(out, HTTPResponseStatus.S405, "Method Not Allowed");
-                return;
+            // según la petición mostraremos, eliminaremos o añadiremos
+            switch (req.getMethod()) {
+                case GET:
+                    handleGet(req, out);
+                case POST:
+                    handlePost(req, out);
+                case DELETE:
+                    handleDelete(req, out);
+                default:
+                    writeError(out, HTTPResponseStatus.S405, "Method Not Allowed");
             }
-
-            final String chain = req.getResourceChain(); // p.ej. "/", "/html?uuid=..."
-            final String resourceName = req.getResourceName(); // p.ej. "html"
-
-            // 3) Si ha mandado http://localhost:8888 devolvemos la pagina de bienvenida
-            if (chain == null || chain.equals("/") || chain.isEmpty()) {
-                HTTPResponse res = new HTTPResponse();
-                res.setStatus(HTTPResponseStatus.S200);
-                res.putParameter("Content-Type", "text/html; charset=UTF-8");
-                res.putParameter("Connection", "close");
-                res.setContent("<html><body><h1>Hybrid Server</h1><p>Bienvenido 👋</p></body></html>");
-                res.print(out);
-                out.flush();
-                return;
-            }
-
-            // 4) Rutas que no sean "/html" → 404
-            if (!"html".equals(resourceName)) {
-                writeError(out, HTTPResponseStatus.S404, "Not Found");
-                return;
-            }
-
-            // 5) Caso /html → con o sin uuid
-            final Map<String, String> params = req.getResourceParameters();
-            final String uuid = (params != null) ? params.get("uuid") : null; // si el uuid es distinto de null lo guardo
-
-            // 5a) http://localhost:8888/html sin uuid → listar todas las páginas
-            if (uuid == null || uuid.isEmpty()) {
-                Map<String, String> all = repository.all();
-
-                StringBuilder html = new StringBuilder()
-                        .append("<!DOCTYPE html><html><head><meta charset=\"utf-8\">")
-                        .append("<title>Listado de páginas</title></head><body>")
-                        .append("<h1>Páginas disponibles</h1>");
-
-                if (all.isEmpty()) {
-                    html.append("<p>No hay páginas almacenadas.</p>");
-                } else {
-                    html.append("<ul>");
-                    for (Map.Entry<String, String> e : all.entrySet()) {
-                        String id = e.getKey();
-                        html.append("<li><a href=\"/html?uuid=")
-                                .append(id)
-                                .append("\">")
-                                .append(id)
-                                .append("</a></li>");
-                    }
-                    html.append("</ul>");
-                }
-
-                html.append("</body></html>");
-
-                HTTPResponse res = new HTTPResponse();
-                res.setStatus(HTTPResponseStatus.S200);
-                res.putParameter("Content-Type", "text/html; charset=UTF-8");
-                res.putParameter("Connection", "close");
-                res.setContent(html.toString());
-                res.print(out);
-                out.flush();
-                return;
-            }
-
-            // 5b) /html con uuid → servir la página si existe
-            final String html = repository.get(uuid);
-            if (html == null) {
-                writeError(out, HTTPResponseStatus.S404, "Not Found");
-                return;
-            }
-
-            HTTPResponse res = new HTTPResponse();
-            res.setStatus(HTTPResponseStatus.S200);
-            res.putParameter("Content-Type", "text/html; charset=UTF-8");
-            res.putParameter("Connection", "close");
-            res.setContent(html);
-            res.print(out);
-            out.flush();
 
         } catch (IOException | HTTPParseException e) {
             try (Writer out = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8)) {
@@ -125,6 +52,86 @@ class ClientHandler implements Runnable {
             } catch (IOException ignore) {
             }
         }
+    }
+
+    private void handleGet(HTTPRequest req, Writer out) throws IOException {
+        final String chain = req.getResourceChain();
+        final String resourceName = req.getResourceName();
+
+        if (chain == null || chain.equals("/") || chain.isEmpty()) {
+            HTTPResponse res = new HTTPResponse();
+            res.setStatus(HTTPResponseStatus.S200);
+            res.putParameter("Content-Type", "text/html; charset=UTF-8");
+            res.putParameter("Connection", "close");
+            res.setContent("<html><body><h1>Hybrid Server</h1><p>Bienvenido 👋</p></body></html>");
+            res.print(out);
+            out.flush();
+            return;
+        }
+
+        if (!"html".equals(resourceName)) {
+            writeError(out, HTTPResponseStatus.S404, "Not Found");
+            return;
+        }
+
+        final Map<String, String> params = req.getResourceParameters();
+        final String uuid = (params != null) ? params.get("uuid") : null;
+
+        if (uuid == null || uuid.isEmpty()) {
+            Map<String, String> all = repository.all();
+
+            StringBuilder html = new StringBuilder()
+                    .append("<!DOCTYPE html><html><head><meta charset=\"utf-8\">")
+                    .append("<title>Listado de páginas</title></head><body>")
+                    .append("<h1>Páginas disponibles</h1>");
+
+            if (all.isEmpty()) {
+                html.append("<p>No hay páginas almacenadas.</p>");
+            } else {
+                html.append("<ul>");
+                for (Map.Entry<String, String> e : all.entrySet()) {
+                    String id = e.getKey();
+                    html.append("<li><a href=\"/html?uuid=")
+                            .append(id)
+                            .append("\">")
+                            .append(id)
+                            .append("</a></li>");
+                }
+                html.append("</ul>");
+            }
+
+            html.append("</body></html>");
+
+            HTTPResponse res = new HTTPResponse();
+            res.setStatus(HTTPResponseStatus.S200);
+            res.putParameter("Content-Type", "text/html; charset=UTF-8");
+            res.putParameter("Connection", "close");
+            res.setContent(html.toString());
+            res.print(out);
+            out.flush();
+            return;
+        }
+
+        // /html con uuid
+        final String html = repository.get(uuid);
+        if (html == null) {
+            writeError(out, HTTPResponseStatus.S404, "Not Found");
+            return;
+        }
+
+        HTTPResponse res = new HTTPResponse();
+        res.setStatus(HTTPResponseStatus.S200);
+        res.putParameter("Content-Type", "text/html; charset=UTF-8");
+        res.putParameter("Connection", "close");
+        res.setContent(html);
+        res.print(out);
+        out.flush();
+    }
+
+    public void handlePost(HTTPRequest req, Writer out) {
+    }
+
+    public void handleDelete(HTTPRequest req, Writer out) {
     }
 
     private static void writeError(Writer out, HTTPResponseStatus status, String message) throws IOException {
