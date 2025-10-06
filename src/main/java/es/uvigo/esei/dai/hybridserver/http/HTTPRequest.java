@@ -124,7 +124,7 @@ public class HTTPRequest {
 
       this.content = body.toString();
     } else {
-      this.content = "";
+      this.content = null;
     }
 
   }
