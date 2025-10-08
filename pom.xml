@@ -37,9 +37,9 @@
 			</roles>
 		</developer>
 		<developer>
-			<id>[pfgullon22]</id>
-			<email>[pfgullon22@esei.uvigo.es]</email>
-			<name>[Pablo Freire Gullón]</name>
+			<id>[daalvarez]</id>
+			<email>[daalvarez@esei.uvigo.es]</email>
+			<name>[Diego Álvarez Álvarez]</name>
 			<organization>Escola Superior de Enxeñaría Informática - Universidade de
 	Vigo</organization>
 			<roles>
@@ -49,7 +49,7 @@
 	</developers>
 
 	<properties>
-		<group.name>[PabloFreireGullon]</group.name>
+		<group.name>[Grupo 2.3]</group.name>
 
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
