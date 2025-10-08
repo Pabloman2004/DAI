@@ -43,7 +43,7 @@ public class HybridServer implements AutoCloseable {
     int nThreads = Math.max(2, Runtime.getRuntime().availableProcessors());
     this.executor = Executors.newFixedThreadPool(nThreads);
 
-    this.stop = false;
+    this.stop = false; //quitar linea
     this.serverThread = new Thread(() -> {
       try (final ServerSocket serverSocket = new ServerSocket(SERVICE_PORT)) {
         while (true) {
@@ -53,7 +53,8 @@ public class HybridServer implements AutoCloseable {
             break;
           }
           // Pasamos también el repositorio al handler
-          executor.submit(new ClientHandler(socket, repository));
+          executor.submit(new ClientHandlerMap(socket, repository));//hay que gestionar el cierre del socket dentro del 
+        
         }
       } catch (IOException e) {
         if (!stop) e.printStackTrace();
