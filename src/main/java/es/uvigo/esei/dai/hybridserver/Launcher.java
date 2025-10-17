@@ -1,41 +1,48 @@
-/**
- *  HybridServer
- *  Copyright (C) 2025 Miguel Reboiro-Jato
- *  
- *  This program is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *  
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *  
- *  You should have received a copy of the GNU General Public License
- *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 package es.uvigo.esei.dai.hybridserver;
 
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class Launcher {
-  public static void main(String[] args) {
-        Map<String, String> seed = Map.of(
-      "1234", "<html><body><h1>Página 1234</h1></body></html>",
-      "abcd", "<html><body><h1>Página abcd</h1></body></html>"
-    );
-      try (HybridServer server = new HybridServer(seed)) {
-      server.start();
-      System.out.println("Servidor escuchando en http://localhost:" + server.getPort());
-      System.out.println("Pulsa ENTER para parar...");
-      System.in.read(); // bloquea hasta ENTER
+    public static void main(String[] args) {
+        Properties config = new Properties();
+
+        // === Cargar fichero de configuración (si se proporciona) ===
+        if (args.length == 1) {
+            String configFile = args[0];
+            try (FileInputStream fis = new FileInputStream(configFile)) {
+                config.load(fis);
+                System.out.println("Configuración cargada desde " + configFile);
+            } catch (IOException e) {
+                System.err.println("❌ Error al leer el fichero de configuración: " + configFile);
+                e.printStackTrace();
+                System.exit(1);
+            }
+        }
+        else{
+            System.out.println("No hay fichero");
+        }
+
+        // === Crear un mapa con páginas (por si queremos usar modo Map) ===
+        Map<String, String> samplePages = new HashMap<>();
+        samplePages.put("demo-uuid", "<html><body><h1>Página de ejemplo</h1><p>Contenido generado en memoria</p></body></html>");
+        samplePages.put("abc123", "<html><body><h1>Hola desde MAP</h1><p>Servidor en modo memoria</p></body></html>");
+
+        // === Inicializar servidor ===
+        // Puedes cambiar fácilmente entre:
+        //   new HybridServer(config) → modo BD
+        //   new HybridServer(samplePages) → modo mapa
+        try (HybridServer server = new HybridServer(config)) {
+            // try (HybridServer server = new HybridServer(samplePages)) { // ← modo memoria
+            server.start();
+            System.out.println("Servidor escuchando en http://localhost:" + server.getPort());
+            System.out.println("Pulsa ENTER para parar...");
+            System.in.read();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-    catch(IOException e){
-      e.printStackTrace();
-      
-    }
-    
-  }
 }
