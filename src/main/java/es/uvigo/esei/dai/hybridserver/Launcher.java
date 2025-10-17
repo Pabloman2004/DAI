@@ -35,7 +35,7 @@ public class Launcher {
         // Puedes cambiar fácilmente entre:
         //   new HybridServer(config) → modo BD
         //   new HybridServer(samplePages) → modo mapa
-        try (HybridServer server = new HybridServer(config)) {
+        try (HybridServer server = new HybridServer(samplePages)) {
             // try (HybridServer server = new HybridServer(samplePages)) { // ← modo memoria
             server.start();
             System.out.println("Servidor escuchando en http://localhost:" + server.getPort());

@@ -24,9 +24,10 @@ public class MAPdaw implements HtmlRepository {
         // 1) Bienvenida en raíz — sin listado
         if ("/".equals(chain) || chain.isEmpty()) {
             String body = "<!DOCTYPE html><html><head><meta charset=\"utf-8\">"
-                    + "<title>Hybrid Server</title></head>"
                     + "<body><h1>Hybrid Server</h1>"
-                    + "<p>Bienvenido 👋</p>"
+                    + "<h2>Map mode</h2>"
+                    + "<p>Pablo Freire Gullon</p></html>"
+                    + "<p>Diego Alvarez Alvarez</p></html>"
                     + "</body></html>";
             return ok(body);
         }

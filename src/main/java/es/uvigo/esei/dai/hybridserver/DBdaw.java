@@ -31,7 +31,9 @@ public class DBdaw implements HtmlRepository {
         final String chain = req.getResourceChain();
         if (chain == null || chain.isEmpty() || "/".equals(chain)) {
             return ok("<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Hybrid Server</title></head>"
-                    + "<body><h1>Hybrid Server</h1><p>Data Base Mode</p></body></html>");
+                    + "<body><h1>Hybrid Server</h1><h2>Data Base Mode</h2></body></html>"
+                    + "<p>Pablo Freire Gullon</p></html>"
+                    + "<p>Diego Alvarez Alvarez</p></html>");
         }
 
         // 2) solo aceptamos /html, si no → 400 (según los tests)

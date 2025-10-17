@@ -25,6 +25,7 @@ public class HybridServer implements AutoCloseable {
 
   public HybridServer(Map<String,String> pages) {
     this.repository = new MAPdaw(pages); 
+    this.numClients = 50;
   }
 
 public HybridServer(Properties properties) {
